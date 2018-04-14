@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mytree</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+	<script src='../../dojo/dojo/dojo.js' data-dojo-config="async:true, parseOnLoad:true"></script>
+	<script>
+	    require([
+	        "dojo/request",
+            "dojo/data/ItemFileWriteStore",
+            "dijit/registry",
+            "dijit/Tree",
+            "dijit/tree/ForestStoreModel",
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dijit/Menu",
+            "dijit/MenuItem",
+            "dijit/PopupMenuItem",
+            "dojo/domReady!"
+    	], function(request,ItemFileWriteStore,registry,Tree,ForestStoreModel,dom,domConstruct){
+            var myStore = null,myModel = null,myTree = null;
+            var result = null;
+            request("../_data/countries.json",{handleAs:"json"}).then(function (data) {
+                console.log(data);
+                result = data;
+                myStore = new ItemFileWriteStore({data:data});
+                myModel = new ForestStoreModel({
+                    store:myStore,
+                    query:{type:"continent"},
+                    rootId:"continentRoot",
+                    rootLabel:"Continents",
+                    childrenAttrs:["children"]
+                });
+                myTree = new Tree({
+                    id: "myTree",
+                    model:myModel,
+                    showRoot: false,
+                    onClick: function (item) {
+                        console.log(item);
+                    }
+                },"myTree");
+                myTree.startup();
+            });
+            filterSome = function () {
+                /*var includeParent = function(itemId) {
+                    tree.model.store.query({
+                        id: itemId
+                    }).forEach(function(item) {
+                        item.keep = true;
+                        //and we include all parent tree
+                        includeParent(item.parent);
+                    });
+                };
+                //reset all node, first we exlude them all
+                tree.model.store.query().forEach(function(item) {
+                    item.keep = false;
+                });
+                //then we include only the one matching
+                tree.model.store.query({
+                    name: new RegExp('.*' + searchBox.value + '.*', 'i')
+                }).forEach(function(item) {
+                    item.keep = true;
+                    //and we include all parent tree
+                    includeParent(item.parent);
+                });*/
+                /*myTree.model.store.fetch({
+                    query: {"app":"test"},
+                    onBegin: function () {
+                        console.log("aaa");
+                    },
+                    onComplete: function(items){
+                        for (var i=0;i<items.length;i++){
+                            console.log(items[i]);
+                        }
+                    //myStore.save();
+                    },
+                    queryOptions: {deep:true}
+                });*/
+
+                request("../_data/countries2.json",{handleAs:"json"}).then(function (data) {
+                    myTree.dndController.selectNone();
+                    myStore = new ItemFileWriteStore({data:data});
+                    myTree.model.store = myStore;
+                    myTree.rootNode.destroyRecursive();
+                    myTree.model.constructor(myTree.model);
+                    myTree.postMixInProperties();
+                    myTree._load();
+                });
+                //delete tree._itemNodesMap;
+                //tree._itemNodesMap = {};
+                //tree.rootNode.state = "UNCHECKED";
+                //delete tree.model.root.children;
+                //tree.model.root.children = null;
+                /*myTree.rootNode.destroyRecursive();
+                myTree.model.constructor(myTree.model);
+                myTree.postMixInProperties();
+                myTree._load();*/
+            }
+    	});
+</script>
+</head>
+<body class="claro">
+<div id="container">
+    <div id="myTree"></div>
+</div>
+<button onclick="filterSome()">filter</button>
+</body>
+</html>

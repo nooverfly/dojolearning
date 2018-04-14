@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+    <script>dojoConfig = {parseOnLoad: true}</script>
+    <script src='../../dojo/dojo/dojo.js'></script>
+
+</head>
+<body class="claro">
+<form id="myform">
+    <input type="radio" name="drink" id="radioOne" checked value="tea"/> <label for="radioOne">Tea</label> <br />
+    <input type="radio" data-dojo-type="dijit/form/RadioButton" name="drink" id="radioTwo" value="coffee"/> <label for="radioTwo">Coffee</label> <br />
+
+    <button data-dojo-type="dijit/form/Button" type="button">
+        Show form submit value
+        <script type="dojo/on" data-dojo-event="click">
+            require(["dojo/dom"], function(dom){
+                 with(dom.byId('myform'))with(elements[0])with(elements[checked?0:1])alert(name+'='+value);
+                 return false;
+            });
+        </script>
+    </button>
+</form>
+<script>
+    require([
+        "dojo/parser","dojo/on","dijit/registry",
+        "dijit/form/RadioButton",
+        "dijit/form/Button", // used for example purpose
+        "dojo/domReady!"
+    ], function(parser,on,registry, RadioButton){
+        //parser.parse();
+        /*var radioOne = new RadioButton({
+            checked: true,
+            value: "tea",
+            name: "drink"
+        }, "radioOne");
+        radioOne.startup();
+        console.log(radioOne);
+        radioOne.on("click",function () {
+            console.log("one");
+        });*/
+        registry.byId("radioTwo").on("click",function () {
+            console.log("two");
+        })
+
+    });
+</script>
+</body>
+</html>

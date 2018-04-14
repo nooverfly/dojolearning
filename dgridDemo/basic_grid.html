@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Simple Grid Creation</title>
+    <link rel="stylesheet" href="../dojo/dojo/resources/dojo.css">
+    <link rel="stylesheet" href="../dojo/dgrid/css/dgrid.css">
+    <link rel="stylesheet" href="../dojo/dgrid/css/skins/claro.css">
+    <style>
+        .heading {
+            font-weight: bold;
+            padding-bottom: 0.25em;
+        }
+        .dgrid {
+            margin: 10px;
+        }
+        #grid {
+            height: 30em;
+        }
+        #grid .field-order {
+            width: 7%;
+        }
+        #grid .field-name {
+            width: 18%;
+        }
+    </style>
+    <script src="../dojo/dojo/dojo.js" data-dojo-config="async: true"></script>
+    <script>
+        require(["dojo/dom","dojo/on","dgrid/Grid", "dojo/domReady!"], function(dom,on,Grid){
+            var columns = [
+                {label:"order", field:"order"},
+                {label:"name", field:"name"},
+                {label:"description", field:"description"},
+                {label:"操作", field:"order", formatter: function (value) {
+                    return "<button class='update' data-uid='"+value+"'>修改</button><button class='delete' data-uid='"+value+"'>删除</button>"
+                }}
+            ];
+            var data = [
+                {order: 1, name:"preheat", description:"Preheat"},
+                {order: 2, name:"mix dry", description:"In a medium bowl"},
+                {order: 3, name:"mix butter", description:"In a large bowl"},
+                {order: 4, name:"mix together", description:"Slowly add the dry"},
+                {order: 5, name:"chocolate chips", description:"Add chocolate chips"},
+                {order: 6, name:"make balls", description:"Scoop up a golf ball"},
+                {order: 7, name:"bake", description:"Put the cookies"},
+                {order: 8, name:"remove", description:"Using a spatula"},
+                {order: 9, name:"eat", description:"Eat and enjoy!"}
+            ];
+
+            var grid = new Grid({
+                columns: columns
+            }, "grid");
+            grid.renderArray(data);
+            var updateHandle = function (obj) {
+                console.log(obj);
+            };
+            var deleteHandle = function (value) {
+                console.log(value);
+            };
+            grid.on("click", function (event) {
+                //var e = event?event:window.event;
+                var target = event.target, type = target.className;
+                //console.log(type);
+                if ("update" == type){
+                    updateHandle({id:1,name:"fly"});
+                } else if("delete" == type){
+                    deleteHandle("id=1");
+                }
+            })
+
+        });
+
+    </script>
+</head>
+<body class="claro">
+<h2>A basic grid rendered from an array</h2>
+<div id="grid"></div>
+</body>
+</html>

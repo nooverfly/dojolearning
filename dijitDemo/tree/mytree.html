@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mytree</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+	<script src='../../dojo/dojo/dojo.js' data-dojo-config="async:true, parseOnLoad:true"></script>
+	<script>
+	    require([
+            "dojo/parser",
+            "dojo/data/ItemFileWriteStore",
+            "dijit/registry",
+            "dijit/Tree",
+            "dijit/tree/ForestStoreModel",
+            "dijit/ColorPalette",
+            "dijit/Menu",
+            "dijit/MenuItem",
+            "dijit/PopupMenuItem",
+            "dojo/domReady!"
+    	], function(parser){
+	        //parser.parse();
+    	});
+    	// Global variable used by mytree (and in turn referenced by Tree_mouse.html robot test)
+    	mouseDowns = 0;
+</script>
+</head>
+<body class="claro">
+<div data-dojo-id="continentStore" data-dojo-type="dojo/data/ItemFileWriteStore" data-dojo-props='url:"../_data/countries.json"'></div>
+	<div data-dojo-id="continentModel" data-dojo-type="dijit/tree/ForestStoreModel" data-dojo-props='store:continentStore, query:{type:"continent"},
+		rootId:"continentRoot", rootLabel:"Continents", childrenAttrs:["children"]'>
+</div>
+<div id="mytree" data-dojo-type="dijit/Tree" aria-labelledby="mytreeLabel"
+     data-dojo-props='model:continentModel, openOnClick:true,showRoot: false, onLoad:function(){ console.log("loaded mytree (first tree)"); }'>
+    <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="item">
+        console.log("Execute of node " + continentStore.getLabel(item)
+            +", population=" + continentStore.getValue(item, "population"));
+    </script>
+</div>
+<!-- <script type="dojo/method" data-dojo-event="onOpen" data-dojo-args="item">
+        console.log("Open of node " + (continentStore.getLabel(item) || "root"));
+    </script>
+    <script type="dojo/method" data-dojo-event="onClose" data-dojo-args="item">
+        console.log("Close of node " + (continentStore.getLabel(item) || "root"));
+    </script>
+    <script type="dojo/method" data-dojo-event="onMouseDown" data-dojo-args="evt">
+        mouseDowns++;
+    </script> -->
+</body>
+</html>

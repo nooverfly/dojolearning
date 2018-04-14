@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../dojo/dijit/themes/claro/claro.css">
+    <style type="text/css">
+        #stackContainer {
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        #stackContainer div {
+            padding: 5px;
+        }
+    </style>
+    <script>dojoConfig = {parseOnLoad: true}</script>
+    <script src='../dojo/dojo/dojo.js'></script>
+
+    <script>
+        require(["dojo/parser", "dijit/layout/StackContainer", "dijit/layout/StackController", "dijit/layout/ContentPane", "dijit/form/Button"]);
+    </script>
+</head>
+<body class="claro">
+<button id="previous" data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){myStackContainer.back()}">&lt;</button>
+<span data-dojo-type="dijit/layout/StackController" data-dojo-props="containerId:'stackContainer'"></span>
+<button id="next" data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){myStackContainer.forward()}">&gt;</button>
+
+<div data-dojo-type="dijit/layout/StackContainer" data-dojo-id="myStackContainer">
+    <div data-dojo-type="dijit/layout/ContentPane" title="Questions">
+        Please answer following questions
+    </div>
+    <div data-dojo-type="dijit/layout/ContentPane" title="Answers">
+        Here is what you should have answered :P
+    </div>
+</div>
+</body>
+</html>

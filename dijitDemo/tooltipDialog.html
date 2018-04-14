@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../dojo/dijit/themes/claro/claro.css">
+    <style type="text/css">
+        #stackContainer {
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        #stackContainer div {
+            padding: 5px;
+        }
+    </style>
+    <script>dojoConfig = {parseOnLoad: true}</script>
+    <script src='../dojo/dojo/dojo.js'></script>
+
+    <script>
+        require([
+            "dijit/TooltipDialog",
+            "dijit/form/TextBox",
+            "dijit/form/Button",
+            "dijit/form/DropDownButton",
+            "dojo/dom",
+            "dojo/domReady!"
+        ], function(TooltipDialog, TextBox, Button, DropDownButton, dom){
+            var myDialog = new TooltipDialog({
+                content:
+                '<label for="name">Name:</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br>' +
+                '<label for="hobby">Hobby:</label> <input data-dojo-type="dijit/form/TextBox" id="hobby" name="hobby"><br>' +
+                '<button data-dojo-type="dijit/form/Button" type="submit">Save</button>'
+            });
+
+            var myButton = new DropDownButton({
+                label: "show tooltip dialog",
+                dropDown: myDialog
+            });
+            dom.byId("dropDownButtonContainer").appendChild(myButton.domNode);
+            myButton.startup();
+        });
+    </script>
+</head>
+<body class="claro">
+<div id="dropDownButtonContainer"></div>
+</body>
+</html>

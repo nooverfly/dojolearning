@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+    <script>dojoConfig = {parseOnLoad: true}</script>
+    <script src='../../dojo/dojo/dojo.js'></script>
+
+    <script>
+        require([
+            "dijit/form/MultiSelect", "dijit/form/Button","dijit/registry",
+            "dojo/dom", "dojo/_base/window", "dojo/domReady!"
+        ], function(MultiSelect, Button,registry, dom, win){
+
+            var sel = dom.byId('dynamic');
+            for(var i=0;i<5;i++){
+                var c = win.doc.createElement('option');
+                c.innerHTML = i;
+                c.value = i;
+                sel.appendChild(c);
+            }
+            var myMultiSelect = new MultiSelect({ name: 'dynamic',style:"width:100px" }, sel);
+            myMultiSelect.startup();
+            myMultiSelect.set("value","");
+
+            var sel2 = dom.byId('dynamic2');
+            for(i=6;i<10;i++){
+                c = win.doc.createElement('option');
+                c.innerHTML = i;
+                c.value = i;
+                sel2.appendChild(c);
+            }
+            var myMultiSelect2 = new MultiSelect({ name: 'dynamic2',style:"width:100px"  }, sel2);
+            myMultiSelect2.startup();
+            myMultiSelect2.set("value","");
+
+            new Button({
+                onClick: function(){
+                    myMultiSelect2.addSelected(myMultiSelect);
+                }
+            }, "progbutton").startup();
+            new Button({
+                onClick: function(){
+                    myMultiSelect.addSelected(myMultiSelect2);
+                }
+            }, "right").startup();
+        });
+    </script>
+</head>
+<body class="claro">
+<select id="dynamic"></select>
+<p><button id="progbutton" type="button">left</button>
+<button id="right" type="button">right</button></p>
+<select id="dynamic2"></select>
+</body>
+</html>

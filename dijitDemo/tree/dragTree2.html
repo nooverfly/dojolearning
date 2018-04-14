@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mytree</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+	<script src='../../dojo/dojo/dojo.js' data-dojo-config="async:true, parseOnLoad:true"></script>
+
+</head>
+<body class="claro">
+<h1>Demo</h1>
+
+<script type="text/javascript">
+require(["dojo/dom","dojo/store/Observable","dojo/store/Memory","dojo/store/JsonRest","dijit/tree/ObjectStoreModel","dijit/Tree",
+         "dojo/aspect","dijit/tree/dndSource","dijit/registry","dojo/Deferred","dojo/_base/lang","dojo/_base/array","dojo/domReady!"],
+function(dom,Observable,Memory,JsonRest,ObjectStoreModel,Tree,aspect,dndSource,registry,Deferred,lang,array) {
+
+    var jstore = new Memory({
+        data:[
+            {id:1,name:"/",          parent_id:null,item_type:"folder",rwx:5},
+            {id:2,  name:"dir1",     parent_id:1,   item_type:"folder",rwx:7},
+            {id:3,  name:"dir2",     parent_id:1,   item_type:"folder",rwx:7},
+            {id:4,  name:"file1",    parent_id:3,   item_type:"file"  ,rwx:7},
+            {id:5,  name:"file2",    parent_id:3,   item_type:"file"  ,rwx:7},
+        ],
+        getChildren: function(obj) {
+            return this.query({parent_id:obj.id});
+        }
+    });
+
+    aspect.around(jstore,"put",function(originalPut) {
+        return function(obj,options) {
+            console.log("store.put("+JSON.stringify(obj)+","+JSON.stringify(options));
+            if (options && options.parent) {
+                obj.parent_id = options.parent.id;
+            }
+            return originalPut.call(jstore,obj,options);
+        };
+    });
+    var store = new Observable(jstore);
+
+    var myModel = new ObjectStoreModel({
+        store: store,
+        query: {id:1},
+        // A modified copy of dojo 1.10.0's dijit/tree/ObjectStoreModel.js's
+        pasteItem:  function(/*Item*/ childItem, /*Item*/ oldParentItem, /*Item*/ newParentItem,
+                                    /*Boolean*/ bCopy, /*int?*/ insertIndex, /*Item*/ before){
+                    // summary:
+                    //              Move or copy an item from one parent item to another.
+                    //              Used in drag & drop.
+
+                    var d = new Deferred();
+
+                    if(oldParentItem === newParentItem && !bCopy && !before){
+                            // Avoid problem when items visually disappear when dropped onto their parent.
+                            // Happens because the (no-op) store.put() call doesn't generate any notification
+                            // that the childItem was added/moved.
+                            d.resolve(true);
+                            return d;
+                    }
+
+                    if(oldParentItem && !bCopy){
+                            // In order for DnD moves to work correctly, childItem needs to be orphaned from oldParentItem
+                            // before being adopted by newParentItem.   That way, the TreeNode is moved rather than
+                            // an additional TreeNode being created, and the old TreeNode subsequently being deleted.
+                            // The latter loses information such as selection and opened/closed children TreeNodes.
+                            // Unfortunately simply calling this.store.put() will send notifications in a random order, based
+                            // on when the TreeNodes in question originally appeared, and not based on the drag-from
+                            // TreeNode vs. the drop-onto TreeNode.
+
+                            this.getChildren(oldParentItem, lang.hitch(this, function(oldParentChildren){
+                                    oldParentChildren = [].concat(oldParentChildren); // concat to make copy
+                                    var index = array.indexOf(oldParentChildren, childItem);
+                                    oldParentChildren.splice(index, 1);
+                                    this.onChildrenChange(oldParentItem, oldParentChildren);
+
+                                    d.resolve(this.store.put(childItem, {
+                                            overwrite: true,
+                                            parent: newParentItem,
+                                            oldParent: oldParentItem,
+                                            before: before,
+                                            isCopy: false
+                                    }));
+                            }));
+                    }else{
+                            d.resolve(this.store.put(childItem, {
+                                    overwrite: true,
+                                    parent: newParentItem,
+                                    oldParent: oldParentItem,
+                                    before: before,
+                                    isCopy: true
+                            }));
+                    }
+
+                    return d;
+            },
+    });
+
+    myModel.getLabel = function(item) {
+        return JSON.stringify(item);
+    };
+    myModel.mayHaveChildren = function(item) {
+        return item.item_type == 'folder';
+    };
+
+    var tree = new Tree({
+        model: myModel,
+        getIconClass: function(item,opened) {
+            console.log("tree.getIconClass: " + JSON.stringify(item));
+            return (item.item_type == 'folder') ? ( opened ? "dijitFolderOpened" : "dijitFolderClosed" ) : 'dijitLeaf';
+        }
+    });
+    var mydnd = new dndSource(tree,{
+        checkItemAcceptance: function(target,source,position) {
+            var targetItem = registry.byNode(target.parentNode).item;
+            var sourceItems = registry.byNode(source.node).selectedItems;
+            if (targetItem.item_type != 'folder') {
+                console.log("checkItemAcceptance; dest is not a folder: "+source.sourceState+" items "+JSON.stringify(sourceItems)+" to "+JSON.stringify(targetItem));
+                return 0;
+            }
+            if (!(targetItem.rwx & 2)) {
+                console.log("checkItemAcceptance; can't create in dest: "+source.sourceState+" items "+JSON.stringify(sourceItems)+" to "+JSON.stringify(targetItem));
+                return 0;
+            }
+            for (var i=0; i < sourceItems.length; ++i) {
+                x = sourceItems[i];
+                if (x.parent_id == targetItem.id) {
+                    console.log("checkItemAcceptance; same directory: "+source.sourceState+" items "+JSON.stringify(sourceItems)+" to "+JSON.stringify(targetItem));
+                    return 0;
+                }
+                if (!(x.rwx & 4)) {
+                    console.log("checkItemAcceptance; item not readable: "+source.sourceState+" items "+JSON.stringify(sourceItems)+" to "+JSON.stringify(targetItem));
+                    return 0;
+                }
+                if (source.sourceState == 'Moved') { // as opposed to 'Copied'
+                    var parentItem = registry.byNode(registry.byNode(source.node).selectedNodes[0].domNode.parentNode.parentNode).item;
+                    //console.log("checkItemAcceptance: parentItem is " + JSON.stringify(parentItem));
+                    if (!(parentItem.rwx & 2)) {
+                        console.log("checkItemAcceptance; from folder doesn't allow delete: "+source.sourceState+" items "+JSON.stringify(sourceItems)+" to "+JSON.stringify(targetItem));
+                        return 0;
+                    }
+                }
+            };
+            return 1;
+        }
+    });
+    tree.dndController = mydnd;
+    tree.placeAt(dom.byId("treePlaceholder"));
+    tree.startup();
+});
+
+</script>
+
+<div id="treePlaceholder"/>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+    <script>dojoConfig = {parseOnLoad: true}</script>
+    <script src='../../dojo/dojo/dojo.js'></script>
+</head>
+<body class="claro">
+<form method="post" action="http://localhost:20001/uploads" id="myForm"
+      enctype="multipart/form-data">
+    <fieldset>
+        <legend>Form Post Test</legend>
+        <input name="file" multiple="true" type="file" id="uploader"
+               data-dojo-type="dojox/form/Uploader" data-dojo-props="label: 'Select Some Files'">
+        <input type="text" name="album" value="Summer Vacation">
+        <input type="text" name="year" value="2011">
+        <input type="submit" label="Submit" data-dojo-type="dijit/form/Button">
+        <div id="files" data-dojo-type="dojox/form/uploader/FileList"
+             data-dojo-props="uploaderId: 'uploader'"></div>
+    </fieldset>
+</form>
+<script>
+    require(["dojox/form/Uploader","dijit/form/Button","dojox/form/uploader/FileList","dojox/form/uploader/plugins/HTML5"]);
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+<link rel="stylesheet" href="../../../dojo/dijit/themes/claro/claro.css">
+
+	<script>dojoConfig = {async: true}</script>
+	<script src='../../../dojo/dojo/dojo.js'></script>
+
+	<script>
+     require([
+         "dojo/_base/window", "dojo/store/Memory",
+         "dijit/tree/ObjectStoreModel", "dijit/Tree",
+         "dojo/domReady!"
+     ], function(win, Memory, ObjectStoreModel, Tree){
+
+         // Create test store, adding the getChildren() method required by ObjectStoreModel
+         var myStore = new Memory({
+             data: [
+                { id: 1, name: 'Dijit Tree API', url: 'http://dojotoolkit.org/api/1.6/dijit.Tree', root: true },
+                { id: 2, name: 'Dijit Tree.model API', url: 'http://dojotoolkit.org/api/1.6/dijit.Tree.model', parent: 1 },
+                { id: 3, name: 'Dijit Tree.ForestStoreModel API', url: 'http://dojotoolkit.org/api/1.6/dijit.tree.ForestStoreModel', parent: 1 },
+                { id: 4, name: 'Dijit Tree.TreeStoreModel API', url: 'http://dojotoolkit.org/api/1.6/dijit.tree.TreeStoreModel', parent: 1 },
+             ],
+             getChildren: function(object){
+                 return this.query({parent: object.id});
+             }
+         });
+
+         // Create the model
+         var myModel = new ObjectStoreModel({
+             store: myStore,
+             query: {root: true}
+         });
+
+         // Create the Tree, specifying an onClick method
+         (new Tree({
+             model: myModel,
+             onClick: function(item){
+                 // Get the URL from the item, and navigate to it
+                 //location.href = item.url;
+                 console.log("hhh");
+             }
+         })).placeAt(win.body()).startup();
+    });
+    	</script>
+    </head>
+    <body class="claro">
+
+    </body>
+    </html>

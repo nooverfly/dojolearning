@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mytree</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+	<script src='../../dojo/dojo/dojo.js' data-dojo-config="async:true, parseOnLoad:true"></script>
+	<script>
+        require([
+            "dojo/dom", "dojo/json", "dstore/MemoryPatch","dijit/Menu","dijit/MenuItem","dijit/registry","dojo/store/Observable",
+            "dijit/Tree", "dojo/domReady!"
+        ], function(dom, json, Memory,Menu,MenuItem,registry,Observable, Tree){
+            // set up the store to get the tree data
+            var governmentStore = new Memory({
+                data: [{
+                           "name": "US Government",
+                           "id": "root",
+                           "children": [
+                               {
+                                   "name": "Congress",
+                                   "id": "congress"
+                               },
+                               {
+                                   "name": "Executive",
+                                   "id": "exec"
+                               },
+                               {
+                                   "name": "Judicial",
+                                   "id": "judicial"
+                               }
+                           ]
+                       }],
+                getChildren: function(object, onComplete){
+                    return onComplete(object.children || []);
+                },
+                mayHaveChildren: function(item){
+                    return "children" in item;
+                },
+                getRoot: function(onItem, onError){
+                    // there should be only on a single object in (the root of) this collection,
+                    // so we just return that
+                    this.forEach(onItem);
+                },
+                getLabel: function(object){
+                    return object.name;
+                }
+            });
+            governmentStore = new Observable(governmentStore);
+
+            // set up the tree, assigning governmentModel;
+            var governmentTree = new Tree({
+                id:"governmentTree",
+                model: governmentStore
+            }, "divTree");
+            governmentTree.startup();
+            var myMenu = new Menu({
+                style:"display:none",
+                targetNodeIds:["governmentTree"],
+                selector:".dijitTreeNode"
+            });
+            myMenu.addChild(new MenuItem({
+                label:"上移",
+                onClick: function() {
+                    var tn = registry.byNode(this.getParent().currentTarget);
+                    var parent = tn.getParent().item;
+                    var next = tn.getNextSibling().item;
+                    var index = tn.getIndexInParent();
+                    console.log(tn.item.id);
+                    //governmentStore.remove(tn.item.id);
+                    governmentStore.put({"name": "test","id": "test"},{overwrite:true,parent:parent,before: next});
+                }
+            }));
+        });
+    </script>
+</head>
+<body class="claro">
+<div id="divTree"></div>
+</body>
+</html>

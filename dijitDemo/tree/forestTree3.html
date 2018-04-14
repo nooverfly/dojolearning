@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mytree</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+	<script src='../../dojo/dojo/dojo.js' data-dojo-config="async:true, parseOnLoad:true"></script>
+	<script>
+	    require([
+	        "dojo/request",
+            "dojo/data/ItemFileWriteStore",
+            "dijit/registry",
+            "dijit/Tree",
+            "dijit/tree/ForestStoreModel",
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dijit/Menu",
+            "dijit/MenuItem",
+            "dijit/PopupMenuItem",
+            "dojo/domReady!"
+    	], function(request,ItemFileWriteStore,registry,Tree,ForestStoreModel,dom,domConstruct){
+            var myStore = null,myModel = null,myTree = null;
+            var result = null;
+            myStore = new ItemFileWriteStore({url:"../_data/countries.json"});
+            myModel = new ForestStoreModel({
+                store:myStore,
+                query:{type:"continent"},
+                rootId:"continentRoot",
+                rootLabel:"Continents",
+                childrenAttrs:["children"]
+            });
+            myTree = new Tree({
+                id: "myTree",
+                model:myModel,
+                showRoot: false
+            },"myTree");
+            myTree.startup();
+            filterSome = function () {
+                myStore.fetch({
+                    query: {"app":"test"},
+                    onBegin: function () {
+                        console.log("aaa");
+                    },
+                    onComplete: function(items){
+                        for (var i=0;i<items.length;i++) {
+                            console.log(items[i]);
+                        }
+                    },
+                    queryOptions: {deep:true}
+                });
+                myStore.save();
+            }
+    	});
+</script>
+</head>
+<body class="claro">
+<div id="container">
+    <div id="myTree"></div>
+</div>
+<button onclick="filterSome()">filter</button>
+</body>
+</html>

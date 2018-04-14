@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Dijit Tree Test</title>
+	<link rel="stylesheet" href="../../../dojo/dijit/themes/claro/claro.css">
+	<link rel="stylesheet" href="../../../dojo/dojo/resources/dnd.css">
+
+	<script src='../../../dojo/dojo/dojo.js' data-dojo-config="async:true, parseOnLoad:true"></script>
+
+	<script type="text/javascript">
+		require([
+		    "dojo/on",
+			"dojo/aspect",
+			"dojo/dnd/Source",
+			"dojo/data/ItemFileWriteStore",
+			"dojo/dom",
+			"dojo/parser",
+			"dojo/topic","dijit/Menu","dijit/MenuItem",
+			"dijit/registry",
+			"dijit/Tree",
+			"dijit/tree/TreeStoreModel",
+			/testController=selector/.test(window.location.search) ? "dijit/tree/_dndSelector" : "dijit/tree/dndSource",
+			"dijit/Menu",
+			"dijit/form/Button",
+			"dijit/focus",	// not used directly, but needed by robot test drivers, ex: Tree_Selector.html
+			"dojo/domReady!"
+		], function(on,aspect, Source, ItemFileWriteStore, dom, parser, topic,Menu,MenuItem,
+					registry, Tree, TreeStoreModel, testController){
+
+			myStore = new ItemFileWriteStore({
+				url: "../_data/categories.json"
+			});
+
+			catModel = new TreeStoreModel({
+				store: myStore,
+				query: {id: "0"}
+			});
+
+			//create a custom label for tree one consisting of the label property pluss the value of the numberOfItems Column
+			/*catTreeCustomLabel = function(item){
+				var label = myStore.getLabel(item);
+				var num = myStore.hasAttribute(item, "numberOfItems") ? myStore.getValues(item,"numberOfItems") : "?";
+				return label + ' (' + num+ ')';
+			};*/
+
+			//on item tree , we want to drop on containers, the root node itself, or between items in the containers
+			/*itemTreeCheckItemAcceptance = function(node, source, position){
+				var item = registry.getEnclosingWidget(node).item;
+				if(item && (item.root || myStore.hasAttribute(item,"numberOfItems"))){
+					return true;
+				}
+				return position != "over";
+			};*/
+
+			// on collection tree, only accept itself as the source tree
+			/*collectionTreeCheckItemAcceptance = function(node,source,position){
+			    console.log("bbb");
+				return source.tree && source.tree.id == "collectionsTree";
+			};
+
+			dndAccept = function(source, nodes){
+			    console.log("aaa");
+				return this.tree.id != "myTree";
+			};*/
+
+			testController.onDndDrop = function() {
+			  console.log("aaa");
+			};
+
+			Tree.prototype.dndController = testController;
+
+			parser.parse();
+
+			selected = [];
+	
+			globalId = 1000;
+			lastSelected = null;
+	
+			// record the selection from tree 1
+			topic.subscribe("myTree", function(message){
+			    console.log("oooo");
+				if(message.event == "execute"){
+					// console.log("Tree1 Select: ",dijit.byId("myTree").store.getLabel(message.item));
+					lastSelected = selected["myTree"] = message.item;
+				}
+			});
+
+			/*topic.subscribe("/dnd/drop",function(source, nodes, copy, target) {
+			  for (var i=0;i<arguments.length;i++){
+			      console.log(arguments[i]);
+			  }
+			});*/
+
+			/*registry.byId("addButton").on("click", function(){
+				var pInfo = {
+					parent: lastSelected,
+					attribute: "children"
+				};
+
+				myStore.newItem({
+					name: dom.byId('newCat').value,
+					numberOfItems:0,
+					id:globalId++
+				}, pInfo);
+			});*/
+
+			aspect.after(myStore, "onNew", function(item, pInfo){
+			    console.log("ccc");
+				var p = pInfo && pInfo.item;
+				if(p){
+					var currentTotal = myStore.getValues(p, "numberOfItems")[0];
+					myStore.setValue(p, "numberOfItems", ++currentTotal);
+				}
+			}, true);
+			var myMenu = new Menu({
+                style:"display:none",
+                targetNodeIds:["collectionsTree"],
+                selector:".dijitTreeNode"
+            });
+            myMenu.addChild(new MenuItem({
+                label:"上移",
+                onClick: function() {
+                    var tn = registry.byNode(this.getParent().currentTarget);
+                    var parent = tn.getParent().item;
+                    //var next = tn.getNextSibling().item;
+                    var index = tn.getIndexInParent();
+                    var curItem = tn.item;
+                    console.log(curItem.id);
+                    //myStore.remove(tn.item.id);
+                    //myStore.put({ id: 'JP', name:'jp', parent: 'AS' },{overwrite:true,parent:parent,before: next});
+                    //myModel.newItem({ id: 'JP', name:'jp', parent: 'AS' },parent,index+1,next);
+                    //console.log(index);
+                    //myStore.newItem({ "id": "6", "name":"test", "numberOfItems":0},parent);
+                    //var newitem = {"id":curItem.id,"name":curItem.name,"numberOfItems":curItem.numberOfItems};
+                    //catModel.newItem(newitem,parent,index+1,next);
+                    //myStore.deleteItem(tn.item);
+                    //catModel.newItem(newitem,parent,index+1,next);
+                    //console.log(parent);
+                    //catModel.deleteItem(tn.item);
+                    catModel.pasteItem(curItem,parent,parent,false,index-1);
+                }
+            }));
+            myMenu.addChild(new MenuItem({
+                label:"新增",
+                onClick: function() {
+                    var tn = registry.byNode(this.getParent().currentTarget);
+                    console.log(tn.item);
+                    var parent = tn.getParent().item;
+                    var pInfo = {
+                        parent: tn.item,
+                        attribute: "children"
+                    };
+                    myStore.newItem({name:"test",numberOfItems:0,id:6},pInfo);
+                    //myStore.save();
+                    console.log("add");
+                }
+            }));
+            myMenu.addChild(new MenuItem({
+                label:"删除",
+                onClick: function() {
+                    var tn = registry.byNode(this.getParent().currentTarget).item;
+                    myStore.deleteItem(tn);
+                    console.log("add");
+                }
+            }));
+            myMenu.addChild(new MenuItem({
+                label:"修改",
+                onClick: function() {
+                    var tn = registry.byNode(this.getParent().currentTarget).item;
+                    myStore.setValue(tn,"name","test");
+                    console.log("update");
+                }
+            }));
+		});
+	</script>
+
+	<style>
+		.myFolder{
+			width: 16px;
+			height: 16px;
+			background: blue;
+		}
+
+		.myItem{
+			width: 16px;
+			height: 16px;
+			background: green;
+
+		}
+	</style>
+
+</head>
+<body class="claro" role="main">
+
+	<div role="presentation" style="float: left; width: 50%;">
+		<div id="collectionsTree" data-dojo-type="dijit/Tree" data-dojo-props='"class":"container", model:catModel,
+			 betweenThreshold:5,
+			persist:false'></div>
+	</div>
+
+	<div data-dojo-id="itemModel" data-dojo-type="dijit/tree/TreeStoreModel" data-dojo-props='store:myStore, query:{id: "0"}, childrenAttrs:["items", "children"]'></div>
+	<div id="itemTree" data-dojo-type="dijit/Tree" data-dojo-props='"class":"container", model:itemModel,
+		dragThreshold:8,
+		betweenThreshold:5,
+		persist:false'></div>
+	</body>
+</html>

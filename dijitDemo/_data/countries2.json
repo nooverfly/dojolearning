@@ -1,0 +1,11 @@
+{
+	"identifier": "id",
+	"label": "name",
+	"items": [
+	        	{ "id": "AS", "name":"Asia", "type":"continent","app":"test",
+	        			"children":[{"_reference":"CN"}, {"_reference":"IN"}, {"_reference":"RU"}, {"_reference":"MN"}] },
+	        		{ "id": "CN", "name":"China","app":"test", "type":"country" },
+	        		{ "id": "IN", "name":"India","app":"test", "type":"country" },
+	        		{ "id": "RU", "name":"Russia","app":"test", "type":"country" },
+	        		{ "id": "MN", "name":"Mongolia","app":"test", "type":"country" }
+]}

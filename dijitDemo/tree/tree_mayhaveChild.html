@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../../dojo/dijit/themes/claro/claro.css">
+
+	<script>dojoConfig = {async: true}</script>
+	<script src='../../../dojo/dojo/dojo.js'></script>
+
+	<script>
+	require(["dojo/dom","dojo/json","dojo/store/Memory","dijit/tree/ObjectStoreModel","dijit/Tree","dojo/domReady!"], function(dom, json, Memory, ObjectStoreModel, Tree){
+        var ss='[{ "id":0, "name": "test", "aa": "ss"},{"id":1,"name":"a","Fartherid":0},{"id":8,"name":"b","Fartherid":0},{"id":11,"name":"c","Fartherid":0},'+
+    '{"id":237,"name":"d","Fartherid":0},{"id":238,"name":"e","Fartherid":0},{"id":82,"name":"f","Fartherid":0},{"id":233,"name":"g","Fartherid":0},'+
+    '{"id":246,"name":"h","Fartherid":0},{"id":9,"name":"i","Fartherid":8},{"id":10,"name":"j","Fartherid":8},{"id":12,"name":"k","Fartherid":11},'+
+    '{"id":13,"name":"l","Fartherid":11},{"id":18,"name":"1","Fartherid":11},{"id":19,"name":"12","Fartherid":11},{"id":235,"name":"m","Fartherid":233},'+
+    '{"id":239,"name":"n","Fartherid":238},{"id":245,"name":"o","Fartherid":238}]';
+         var dt = JSON.parse(ss);
+         var continentStore = new Memory({
+            data: dt
+         });
+         continentStore.getChildren = function(object){
+            return this.query({Fartherid: this.getIdentity(object)});//Fartherid为绑定的父节点id
+         };
+         var continentModel = new ObjectStoreModel({
+            store: continentStore,
+            query: {id:0},                   //将该目录树绑定道节点为0的id上
+            mayHaveChildren: function(item){ //如果子节点没有内容，图标就显示成文档
+                console.log(item);
+                if(item.id===0) return true;
+                for(var i=0;i<dt.length;i++){
+                    if(item.id===dt[i].Fartherid) return true;
+                }
+                return false;
+            }
+         });
+        var governmentTree = new Tree({
+            model: continentModel,
+            openOnClick: true,
+            showRoot:true,                  //是否显示跟节点
+            autoExpand: true,
+            onLoad: function(){             //加载完毕
+                console.log("plantTree");
+            },
+            onClick: function(item){       //单击事件
+                console.log(item);
+            },
+            persist: false
+        }, "rootlessTree");
+        governmentTree.startup();
+    });
+    </script>
+</head>
+<body class="claro">
+<div id="rootlessTree"></div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+<link rel="stylesheet" href="../../../dojo/dijit/themes/claro/claro.css">
+
+	<script>dojoConfig = {async: true}</script>
+	<script src='../../../dojo/dojo/dojo.js'></script>
+
+	<script>
+    var storeData2 = {
+        identifier: 'name',
+        label: 'name',
+        items: [
+            { name:'Africa', type:'continent', children:[
+                { name:'Egypt', type:'country' },
+                { name:'Kenya', type:'country', children:[
+                    { name:'Nairobi', type:'city' },
+                    { name:'Mombasa', type:'city' } ]
+                },
+                { name:'Sudan', type:'country', children:
+                    { name:'Khartoum', type:'city' }
+                }
+            ]},
+            { name:'Asia', type:'continent', children:[
+                { name:'China', type:'country' },
+                { name:'India', type:'country' },
+                { name:'Russia', type:'country' },
+                { name:'Mongolia', type:'country' } ]
+            },
+            { name:'Australia', type:'continent', population:'21 million', children:
+                { name:'Commonwealth of Australia', type:'country', population:'21 million'}
+            },
+            { name:'Europe', type:'continent', children:[
+                { name:'Germany', type:'country' },
+                { name:'France', type:'country' },
+                { name:'Spain', type:'country' },
+                { name:'Italy', type:'country' } ]
+            },
+            { name:'North America', type:'continent', children:[
+                { name:'Mexico', type:'country',  population:'108 million', area:'1,972,550 sq km', children:[
+                    { name:'Mexico City', type:'city', population:'19 million', timezone:'-6 UTC'},
+                    { name:'Guadalajara', type:'city', population:'4 million', timezone:'-6 UTC' } ]
+                },
+                { name:'Canada', type:'country',  population:'33 million', area:'9,984,670 sq km', children:[
+                    { name:'Ottawa', type:'city', population:'0.9 million', timezone:'-5 UTC'},
+                    { name:'Toronto', type:'city', population:'2.5 million', timezone:'-5 UTC' }]
+                },
+                { name:'United States of America', type:'country' } ]
+            },
+            { name:'South America', type:'continent', children:[
+                { name:'Brazil', type:'country', population:'186 million' },
+                { name:'Argentina', type:'country', population:'40 million' } ]
+            }
+        ]
+    };
+
+    	</script>
+    </head>
+    <body class="claro">
+        <div data-dojo-type="dojo/data/ItemFileWriteStore" data-dojo-props="data:storeData2" data-dojo-id="geographyStore2"></div>
+    <b>Before pressing delete, be sure to expand out the tree so you can see nodes (items), being removed from it.</b><br>
+    <div data-dojo-type="dijit/form/Button" data-dojo-id="button3">Delete All Cities!</div><br><br>
+    <div data-dojo-type="dijit/tree/ForestStoreModel" data-dojo-id="geographyModel2" data-dojo-props="store:geographyStore2, query:{type: 'continent'}, rootId:'Geography', rootLabel:'Geography'"></div>
+    <div data-dojo-type="dijit/Tree" data-dojo-props="model:geographyModel2"></div>
+    <script>
+    require(["dojo/ready","dojo/dom", "dojo/on", "dojo/parser", "dojo/data/ItemFileReadStore", "dojo/data/ItemFileWriteStore", "dijit/form/Button", "dijit/Tree"],
+        function(ready,dom, on){
+        on(button3, "click", deleteCities);
+            function deleteCities(){
+                function gotCities(items, request){
+                    if(items ){
+                        var i;
+                        for(i = 0; i < items.length; i++){
+                            var item = items[i];
+                            geographyStore2.deleteItem(item);
+                        }
+                    }
+                }
+                geographyStore2.fetch({query:{type: "city"}, onComplete: gotCities, queryOptions: {deep:true}});
+            }
+
+        });
+</script>
+    </body>
+    </html>

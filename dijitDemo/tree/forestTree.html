@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mytree</title>
+    <link rel="stylesheet" href="../../dojo/dijit/themes/claro/claro.css">
+	<script src='../../dojo/dojo/dojo.js' data-dojo-config="async:true, parseOnLoad:true"></script>
+	<script>
+	    require([
+	        "dojo/request",
+            "dojo/data/ItemFileWriteStore",
+            "dijit/registry",
+            "dijit/Tree",
+            "dijit/tree/ForestStoreModel",
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dijit/Menu",
+            "dijit/MenuItem",
+            "dijit/PopupMenuItem",
+            "dojo/domReady!"
+    	], function(request,ItemFileWriteStore,registry,Tree,ForestStoreModel,dom,domConstruct){
+            var myStore = null,myModel = null,myTree = null;
+            var result = null;
+            request("../_data/countries.json",{handleAs:"json"}).then(function (data) {
+                console.log(data);
+                result = data;
+                myStore = new ItemFileWriteStore({data:data});
+                myModel = new ForestStoreModel({
+                    store:myStore,
+                    query:{type:"continent"},
+                    rootId:"continentRoot",
+                    rootLabel:"Continents",
+                    childrenAttrs:["children"]
+                });
+                myTree = new Tree({
+                    id: "myTree",
+                    model:myModel,
+                    showRoot: false
+                },"myTree");
+                myTree.startup();
+
+            });
+            filterSome = function () {
+                var con = dom.byId("container");
+                domConstruct.create("div",{
+                    id:'myTree'
+                },con);
+                /*myStore.fetch({
+                    query: {"app":"test"},
+                    onBegin: function () {
+                        console.log("aaa");
+                    },
+                    onComplete: function(items){
+                        /!*for (var i = 0; i < result.items.length; i++){
+                            myStore.deleteItem(result.items[i]);
+                        }*!/
+                        //console.log(items);
+                        for (var i=0;i<items.length;i++){
+                            console.log(items[i]);
+                        }
+                        //myStore.save();
+                    }
+                    //queryOptions: {deep:true}
+                });*/
+                request("../_data/countries2.json",{handleAs:"json"}).then(function (data) {
+                    /*myStore.clearOnClose = true;
+                    myStore.close();
+                    myTree.rootNode.destroyRecursive();
+
+                    for (var j=0;j<data.items.length;j++){
+                        myStore.newItem(data.items[j]);
+                    }
+                    myStore.save();*/
+                    myTree.destroyRecursive();
+                    myStore = new ItemFileWriteStore({data:data});
+                    myModel = new ForestStoreModel({
+                        store:myStore,
+                        query:{type:"continent"},
+                        rootId:"continentRoot",
+                        rootLabel:"Continents",
+                        childrenAttrs:["children"]
+                    });
+                    myTree = new Tree({
+                        id: "myTree",
+                        model:myModel,
+                        showRoot: false
+                    },"myTree");
+                    //myTree.startup();
+                });
+                //myModel.set("query",{type:"continent",app:"test"});
+                //myModel.query = {type:"continent",app:"test"};
+                //myModel.fetchItemByIdentity({app:"test"});
+            }
+    	});
+</script>
+</head>
+<body class="claro">
+<div id="container">
+    <div id="myTree"></div>
+</div>
+<button onclick="filterSome()">filter</button>
+</body>
+</html>
